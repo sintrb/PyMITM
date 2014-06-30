@@ -1,6 +1,4 @@
 PyMITM
 ======
-A Man-in-the-Middle Attack Tool by Python2 (一个Python2实现的中间人攻击工具)
-
-
+A Man-in-the-Middle Attack Tool by Python 2.x (一个Python 2.x实现的中间人攻击工具)
 
