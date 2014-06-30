@@ -38,8 +38,6 @@ class HttpRequest(object):
 		else:
 			self.hostname = host
 			self.hostport = 80
-
-		print self.path
 		
 
 class HttpProxyHandler(SocketServer.BaseRequestHandler):
@@ -62,6 +60,8 @@ class HttpProxyHandler(SocketServer.BaseRequestHandler):
 				cache[req.path] = data
 			else:
 				data = cache[req.path]
+			print '(%s)%s'%(len(data), req.path)
+			print data
 		else:
 			# not a http request
 			msg = 'not a http request'
