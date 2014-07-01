@@ -203,7 +203,7 @@ class HttpProxyHandler(SocketServer.StreamRequestHandler):
 			self.wfile.write(res.get_alldata())
 			self.wfile.flush()
 
-class HttpProxyServer(SocketServer.TCPServer):
+class HttpProxyServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
 	'''
 	A Base Http Proxy Server
 	'''
