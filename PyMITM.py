@@ -50,8 +50,8 @@ class  HackPic(HttpProxyHandler):
 			out.save(of, content_type[content_type.index('/')+1:])
 			of.seek(0)
 			res.databody = of.read()
-		ck = req.hostname + req.path
-		cache[ck] = res
+			ck = req.hostname + req.path
+			cache[ck] = res
 
 
 
