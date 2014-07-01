@@ -27,10 +27,11 @@ cache = {}
 
 class  HackPic(HttpProxyHandler):
 	def before_proxy(self, req):
-		print req.firstline
+		# print req.hostname + ' ' + req.firstline
 		if 'If-Modified-Since' in req.headers:
 			del req.headers['If-Modified-Since']
 		ck = req.hostname + req.path
+		print ck
 		if ck in cache:
 			print 'cache'
 			return cache[ck]
