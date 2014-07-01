@@ -21,7 +21,7 @@ class HTTPObject:
 		'''
 		self.fd = fd
 		self.headers = {}
-		self.databody = {}
+		self.databody = None
 
 		# parse
 		self.parse_header()
@@ -46,7 +46,7 @@ class HTTPObject:
 				k = l[0:ix].strip()
 				v = l[ix+1:].strip()
 				hd.append((k, v),)
-			if not l:
+			if not l and not isfirst:
 				break
 		self.headers = dict(hd)
 
@@ -84,8 +84,22 @@ class HTTPObject:
 
 			self.databody = ''.join(data)
 			del headers['Transfer-Encoding']	# it will transfer all data once time, so unneccessary Transfer-Encoding
+	def do_unzip(self):
+		'''
+		unzip the databody if the databody is a ziped data
+		'''
+		if 'Content-Encoding' in self.headers and self.headers['Content-Encoding'] == 'gzip':
+			import StringIO, gzip
+			da = StringIO.StringIO(self.databody)
+			gf = gzip.GzipFile(fileobj=da)
+			self.databody = gf.read()
+			gf.close()
+			da.close()
+			del self.headers['Content-Encoding']
 
 	def get_alldata(self):
+		if self.databody:
+			self.headers['Content-Length'] = len(self.databody)
 		return '%s\r\n%s\r\n\r\n%s'%(self.firstline, '\r\n'.join(['%s: %s'%(k,v) for k,v in self.headers.items()]), self.databody or '')
 
 class RequestObject(HTTPObject):
@@ -113,14 +127,19 @@ class RequestObject(HTTPObject):
 
 		# get reality host name and port
 		# it's in headers, "Host: hostname:port"
-		host = self.headers['Host']
-		clix = host.find(':')
-		if clix>0:
-			self.hostname = host[0:clix]
-			self.hostport = int(host[clix+1:])
-		else:
-			self.hostname = host
-			self.hostport = 80	# 80 is default		
+		try:
+			host = self.headers['Host']
+			clix = host.find(':')
+			if clix>0:
+				self.hostname = host[0:clix]
+				self.hostport = int(host[clix+1:])
+			else:
+				self.hostname = host
+				self.hostport = 80	# 80 is default
+		except:
+			print self.raw_firstline
+			print self.headers
+
 
 
 class ResponseObject(HTTPObject):
@@ -134,7 +153,7 @@ class ResponseObject(HTTPObject):
 			self.version, self.code, self.status = self.firstline.split()
 		else:
 			self.version, self.code, self.status = ('HTTP1.0', 200, 'OK')
-		self.headers['Content-Length'] = self.databody and len(self.databody) or '0'
+		
 
 
 class HttpProxyHandler(SocketServer.StreamRequestHandler):
@@ -171,7 +190,7 @@ class HttpProxyHandler(SocketServer.StreamRequestHandler):
 
 			# send request data to server
 			sock.send(req.get_alldata())
-
+			sock.settimeout(10)
 			#  Generate a Response object From server response
 			res = ResponseObject(sock.makefile())
 			sock.close()
@@ -184,12 +203,21 @@ class HttpProxyHandler(SocketServer.StreamRequestHandler):
 			self.wfile.write(res.get_alldata())
 			self.wfile.flush()
 
-
+class HttpProxyServer(SocketServer.TCPServer):
+	'''
+	A Base Http Proxy Server
+	'''
+	def __init__(self, server_address, HttpProxyHandlerClass=HttpProxyHandler, bind_and_activate=True):
+		'''
+		Init a Http Proxy Server,
+		HttpProxyHandlerClass must be a subclass of HttpProxyHandler
+		'''
+		SocketServer.TCPServer.__init__(self, server_address, HttpProxyHandlerClass, bind_and_activate)
 
 if __name__ == '__main__':
 	import sys
 	host, port = '0.0.0.0', len(sys.argv) == 2 and int(sys.argv[1]) or 9999
-	serv = SocketServer.TCPServer((host, port), HttpProxyHandler)
+	serv = HttpProxyServer((host, port), )
 	print 'Proxy Server running at %s:%s'%(host, port)
 	serv.serve_forever()
 
