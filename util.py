@@ -18,3 +18,10 @@ def recvall(soc):
 			break
 		soc.settimeout(5)
 	return ''.join(data)
+		# if 'Content-Encoding' in headers and headers['Content-Encoding'] == 'gzip':
+		# 	da = StringIO.StringIO(self.databody)
+		# 	gf = gzip.GzipFile(fileobj=da)
+		# 	self.databody = gf.read()
+		# 	gf.close()
+		# 	da.close()
+		# 	del headers['Content-Encoding']
