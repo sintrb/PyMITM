@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # @Date    : 2014-06-30
 # @Author  : Robin (sintrb@gmail.com)
-# @Link    : https://github.com/sintrb/PyMITM/PyHTTPProxy.py
+# @Link    : https://github.com/sintrb/PyMITM/blob/master/PyHTTPProxy.py
 # @Version : 1.0
 
 import re
@@ -187,7 +187,9 @@ class HttpProxyHandler(SocketServer.StreamRequestHandler):
 
 
 if __name__ == '__main__':
-	host, port = '0.0.0.0', 9999
+	import sys
+	host, port = '0.0.0.0', len(sys.argv) == 2 and int(sys.argv[1]) or 9999
 	serv = SocketServer.TCPServer((host, port), HttpProxyHandler)
+	print 'Proxy Server running at %s:%s'%(host, port)
 	serv.serve_forever()
 
