@@ -190,7 +190,7 @@ class HttpProxyHandler(SocketServer.StreamRequestHandler):
 
 			# send request data to server
 			sock.send(req.get_alldata())
-			sock.settimeout(10)
+			#sock.settimeout(10)
 			#  Generate a Response object From server response
 			res = ResponseObject(sock.makefile())
 			sock.close()
