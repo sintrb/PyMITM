@@ -8,20 +8,48 @@
 
 from PyHTTPProxy import HttpProxyHandler, HttpProxyServer
 
-class  InjectJS(HttpProxyHandler):
+import random
+
+jokecsses = ['''
+<style type="text/css">
+.sin-joke {
+   filter:progid:DXImageTransform.Microsoft.BasicImage(rotation=2);
+   -moz-transform: rotate(180deg);
+   -o-transform: rotate(180deg);
+   -webkit-transform: rotate(180deg);
+   transform: rotate(180deg);
+}
+</style>
+''',
+
+'''
+<style type="text/css">
+.sin-joke {
+
+}
+</style>
+''',
+]
+
+
+class  HTMLInject(HttpProxyHandler):
+	def before_proxy(self, req):
+		print req.hostname + ' ' + req.firstline
+
 	def after_proxy(self, req, res):
 		print res.firstline
-		return False
-		if res.databody and 'Content-Type' in res.headers and res.headers['Content-Type'] == 'text/html':
-			print 'can InjectJS'
+		if res.databody and 'Content-Type' in res.headers and 'text/html' in res.headers['Content-Type']:
+			print 'can Inject'
 			res.do_unzip()
-			js = '<script>alert("hello");</script></head>'
 			try:
-				res.databody = res.databody.replace('</head>', js)
+				res.databody = res.databody.replace('</head>', '%s</head>'%random.choice(jokecsses))
+				res.databody = res.databody.replace('<body', '<body class="sin-joke"')
 			except:
 				print res.databody
 			print res.databody.find('</head>')
-		
+			
+			if 'Last-Modified' in req.headers:
+				del req.headers['Last-Modified']
 
 cache = {}
 
@@ -39,7 +67,7 @@ class  HackPic(HttpProxyHandler):
 			print 'request'
 		
 	def after_proxy(self, req, res):
-		print res.firstline
+		print res.firstline		
 		if res.databody and 'Content-Type' in res.headers and res.headers['Content-Type'] in ['image/jpeg', 'image/jpg', 'image/png']:
 			content_type = res.headers['Content-Type']
 			res.do_unzip()
@@ -59,6 +87,6 @@ class  HackPic(HttpProxyHandler):
 if __name__ == '__main__':
 	import sys
 	host, port = '0.0.0.0', len(sys.argv) == 2 and int(sys.argv[1]) or 9999
-	serv = HttpProxyServer((host, port), HackPic)
+	serv = HttpProxyServer((host, port), HTMLInject)
 	print 'Proxy Server running at %s:%s'%(host, port)
 	serv.serve_forever()
