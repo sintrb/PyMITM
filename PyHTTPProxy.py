@@ -216,7 +216,7 @@ class HttpProxyServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
 
 if __name__ == '__main__':
 	import sys
-	host, port = '0.0.0.0', len(sys.argv) == 2 and int(sys.argv[1]) or 9999
+	host, port = '0.0.0.0', len(sys.argv) == 2 and int(sys.argv[1]) or 8080
 	serv = HttpProxyServer((host, port), )
 	print 'Proxy Server running at %s:%s'%(host, port)
 	serv.serve_forever()
