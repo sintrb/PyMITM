@@ -10,7 +10,28 @@ from PyHTTPProxy import HttpProxyHandler, HttpProxyServer
 
 import random
 
-jokecsses = ['''
+jokecsses = [
+'''
+<style type="text/css">
+.sin-joke {
+
+}
+</style>
+''',
+
+# '''
+# <style type="text/css">
+# .sin-joke {
+#    filter:progid:DXImageTransform.Microsoft.BasicImage(rotation=1);
+#    -moz-transform: rotate(90deg);
+#    -o-transform: rotate(90deg);
+#    -webkit-transform: rotate(90deg);
+#    transform: rotate(90deg);
+# }
+# </style>
+# ''',
+
+'''
 <style type="text/css">
 .sin-joke {
    filter:progid:DXImageTransform.Microsoft.BasicImage(rotation=2);
@@ -22,13 +43,18 @@ jokecsses = ['''
 </style>
 ''',
 
-'''
-<style type="text/css">
-.sin-joke {
+# '''
+# <style type="text/css">
+# .sin-joke {
+#    filter:progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
+#    -moz-transform: rotate(270deg);
+#    -o-transform: rotate(270deg);
+#    -webkit-transform: rotate(270deg);
+#    transform: rotate(270deg);
+# }
+# </style>
+# ''',
 
-}
-</style>
-''',
 ]
 
 
@@ -45,7 +71,8 @@ class  HTMLInject(HttpProxyHandler):
 				res.databody = res.databody.replace('</head>', '%s</head>'%random.choice(jokecsses))
 				res.databody = res.databody.replace('<body', '<body class="sin-joke"')
 			except:
-				print res.databody
+				# print res.databody
+				pass
 			print res.databody.find('</head>')
 			
 			if 'Last-Modified' in req.headers:
