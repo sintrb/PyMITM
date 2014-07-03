@@ -6,6 +6,6 @@ A Man-in-the-Middle Attack Toolchain by Python 2.x, include DNSSpoofing(by a sim
 
 主要组件：
 
-* DNS服务器: 通过[PyDNSServer](./blob/master/PyDNSServer.py)实现
-* HTTP代理服务器: 通过[PyHTTPProxy](./blob/master/PyHTTPProxy.py)实现
+* DNS服务器: 通过[PyDNSServer](https://github.com/sintrb/PyMITM/blob/master/PyDNSServer.py)实现
+* HTTP代理服务器: 通过[PyHTTPProxy](https://github.com/sintrb/PyMITM/blob/master/PyHTTPProxy.py)实现
 
