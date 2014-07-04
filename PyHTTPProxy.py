@@ -135,10 +135,11 @@ class RequestObject(HTTPObject):
 				self.hostport = int(host[clix+1:])
 			else:
 				self.hostname = host
-				self.hostport = 80	# 80 is default
+				self.hostport = 80	# 80 is http default port
 		except:
 			print self.raw_firstline
 			print self.headers
+			self.hostport = None
 
 
 
@@ -186,7 +187,10 @@ class HttpProxyHandler(SocketServer.StreamRequestHandler):
 		if not res:
 			# create a socket and connect to server
 			sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-			sock.connect((req.hostname, req.hostport),)
+			print req.raw_firstline
+			print req.headers['Host']
+			print req.hostport or self.server.server_address[1]
+			sock.connect((req.hostname, req.hostport or self.server.server_address[1]),)
 
 			# send request data to server
 			sock.send(req.get_alldata())
