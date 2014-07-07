@@ -1,0 +1,28 @@
+
+
+
+
+config
+	dnsfool:
+		listen
+			hostname: 0.0.0.0
+			port: 53
+		resolv
+			fromip1:
+				www.baidu.com: 172.16.0.100
+				*: None
+			fromip2:
+				*: None
+
+			*:None
+	prox:
+		listen
+			hostname: 0.0.0.0
+			port: 80
+		resolv
+			fromip1:
+				www.baidu.com: 172.16.0.100
+				*: None
+			fromip2:
+				*: None
+

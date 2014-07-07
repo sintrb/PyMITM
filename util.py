@@ -5,6 +5,11 @@
 # @Link    : https://github.com/sintrb/PyMITM
 # @Version : 1.0
 
+import re
 def getselfidp():
 	import socket
 	return socket.gethostbyname(socket.gethostname())
+
+
+def match(p, s):
+	return p == s or re.match(p, s)
