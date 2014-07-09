@@ -6,7 +6,7 @@
 # @Version : 1.0
 
 import re
-def getselfidp():
+def getselfip():
 	import socket
 	return socket.gethostbyname(socket.gethostname())
 
