@@ -8,8 +8,16 @@
 from PyHTTPProxy import HttpProxyHandler, HttpProxyServer
 from PyDNSServer import DNSQueryHandler, DNSServer
 from util import match, match_in_dic
+import time
 
 class DNSSpoofingHandler(DNSQueryHandler):
+	def log(self,l):
+		while self.server.log_lock:
+			time.sleep(0.001)
+		self.server.log_lock = True
+		self.server.log(l)
+		self.server.log_lock = False
+
 	def spoofing(self, hostname, dns, rawdata, sock):
 		fromip = self.client_address[0]
 		for ipp,rev in self.server.resolvs:
@@ -34,6 +42,7 @@ class DNSSpoofingServer(DNSServer):
 		if self.log_console:
 			print l
 	def __init__(self, setting):
+		self.log_lock = False
 		self.setting = setting
 		self.resolvs = self.setting['resolvs']
 		self.logging = self.setting['logging']
@@ -49,6 +58,13 @@ class DNSSpoofingServer(DNSServer):
 
 
 class HttpHijackHandler(HttpProxyHandler):
+	def log(self,l):
+		while self.server.log_lock:
+			time.sleep(0.001)
+		self.server.log_lock = True
+		self.server.log(l)
+		self.server.log_lock = False
+
 	def match_rehijack(self,req,hijack):
 		return match_in_dic(hijack, 'host', req.hostname) and match_in_dic(hijack, 'method', req.method) and match_in_dic(hijack, 'path', req.path)
 	def match_headers(self,headers,hijackheaders):
@@ -69,14 +85,22 @@ class HttpHijackHandler(HttpProxyHandler):
 	def after_proxy(self, req, res):
 		for hijack in self.server.hijacks:
 			self.is_ipmatch = match_in_dic(hijack, 'ip', self.client_address[0])
-			self.is_response = 'response' in hijack and 'handler' in hijack['response'] and hijack['response']['handler']
+			self.is_response = 'response' in hijack and 'handler' in hijack['response'] and hijack['response']['handler'] and match_in_dic(hijack['response'], 'code', str(res.code))
 			self.is_rematch = self.match_rehijack(req, hijack)
 			self.is_resheadersmatch = not 'response' in hijack or not 'headers' in hijack['response'] or self.match_headers(res.headers, hijack['response']['headers'])
 			if self.is_ipmatch and self.is_response and self.is_rematch and self.is_resheadersmatch:
 				return hijack['response']['handler'](self, req, res)
 
 class HttpHijackServer(HttpProxyServer):
+	def log(self, l):
+		if self.log_file:
+			self.log_file.write(l)
+			self.log_file.write("\n")
+			self.log_file.flush()
+		if self.log_console:
+			print l
 	def __init__(self, setting):
+		self.log_lock = False
 		self.setting = setting
 		self.hijacks = setting['hijacks']
 		self.logging = self.setting['logging']
