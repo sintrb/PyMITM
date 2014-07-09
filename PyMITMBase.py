@@ -62,7 +62,7 @@ class HttpHijackHandler(HttpProxyHandler):
 			self.is_ipmatch = match_in_dic(hijack, 'ip', self.client_address[0])
 			self.is_request = 'request' in hijack and 'handler' in hijack['request'] and hijack['request']['handler']
 			self.is_rematch = self.match_rehijack(req, hijack)
-			self.is_reqheadersmatch = not 'headers' in hijack['request'] or self.match_headers(req.headers, hijack['request']['headers'])
+			self.is_reqheadersmatch = not 'request' in hijack or not 'headers' in hijack['request'] or self.match_headers(req.headers, hijack['request']['headers'])
 			if self.is_ipmatch and self.is_request and self.is_rematch and self.is_reqheadersmatch:
 				return hijack['request']['handler'](self, req)
 				
@@ -71,7 +71,7 @@ class HttpHijackHandler(HttpProxyHandler):
 			self.is_ipmatch = match_in_dic(hijack, 'ip', self.client_address[0])
 			self.is_response = 'response' in hijack and 'handler' in hijack['response'] and hijack['response']['handler']
 			self.is_rematch = self.match_rehijack(req, hijack)
-			self.is_resheadersmatch = not 'headers' in hijack['response'] or self.match_headers(res.headers, hijack['response']['headers'])
+			self.is_resheadersmatch = not 'response' in hijack or not 'headers' in hijack['response'] or self.match_headers(res.headers, hijack['response']['headers'])
 			if self.is_ipmatch and self.is_response and self.is_rematch and self.is_resheadersmatch:
 				return hijack['response']['handler'](self, req, res)
 
