@@ -12,4 +12,15 @@ def getselfidp():
 
 
 def match(p, s):
-	return p == s or re.match(p, s)
+	r = p == s or re.match(p, s)
+	# if r:
+	# 	print '%s == %s'%(p,s)
+	# else:
+	# 	print '%s != %s'%(p,s)
+	return r
+
+def match_in_dic(d, pk, s):
+	if not pk in d:
+		return True
+	else:
+		return match(d[pk], s)
