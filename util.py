@@ -12,6 +12,7 @@ def getselfip():
 
 
 def match(p, s):
+	# print '%s == %s ?'%(p,s)
 	r = p == s or re.match(p, s)
 	# if r:
 	# 	print '%s == %s'%(p,s)
