@@ -187,9 +187,9 @@ class HttpProxyHandler(SocketServer.StreamRequestHandler):
 		if not res:
 			# create a socket and connect to server
 			sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-			print req.raw_firstline
-			print req.headers['Host']
-			print req.hostport or self.server.server_address[1]
+			# print req.raw_firstline
+			# print req.headers['Host']
+			# print req.hostport or self.server.server_address[1]
 			sock.connect((req.hostname, req.hostport or self.server.server_address[1]),)
 
 			# send request data to server
