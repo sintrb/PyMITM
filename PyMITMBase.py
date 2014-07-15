@@ -35,6 +35,7 @@ class DNSSpoofingHandler(DNSQueryHandler):
 
 class DNSSpoofingServer(DNSServer):
 	def log(self, l):
+		l = '%s %s'%(time.strftime('%Y-%m-%d %H:%M:%S'), l)
 		if self.log_file:
 			self.log_file.write(l)
 			self.log_file.write("\n")
@@ -93,6 +94,7 @@ class HttpHijackHandler(HttpProxyHandler):
 
 class HttpHijackServer(HttpProxyServer):
 	def log(self, l):
+		l = '%s %s'%(time.strftime('%Y-%m-%d %H:%M:%S'), l)
 		if self.log_file:
 			self.log_file.write(l)
 			self.log_file.write("\n")
