@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # @Date    : 2014-06-30
 # @Author  : Robin (sintrb@gmail.com)
-# @Link    : https://github.com/sintrb/PyMITM/blob/master/PyDNSServer.py
+# @Link    : https://github.com/sintrb/PyDNSServer
 # @Version : 1.0
 
 import SocketServer
